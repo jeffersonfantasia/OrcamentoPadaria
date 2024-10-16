@@ -1,2 +1,4 @@
-# OrcamentoPadaria
-Orçamento da Padaria do Seu Manoel
+# Orçamento da Padaria do Seu Manoel
+*Treinamento Black Eagle - Jovi Treinamentos!*
+
+### Criando um orçamento empresarial automatizado utilizando Excel com Power Query e VBA
