@@ -1,0 +1,48 @@
+(
+
+    LinhaConta as text, 
+    LinhaCenCus as text, 
+    CencusCod as text, 
+    ContaCod as text
+
+) =>
+
+let
+    x =
+
+        // tributos sobre doações
+             if 	(  
+                            Text.StartsWith(CencusCod,"10512") 
+                        or  Text.StartsWith(CencusCod,"900")  
+                    )
+                    and     Text.StartsWith(ContaCod,"34301") 
+                    then "03.06"
+
+	else if     ContaCod = "35101005" 
+		    then "03.03"	
+
+        else if     Text.Trim(CencusCod) = "5298" 
+                    then "02.01"
+
+        else if     Text.Trim(CencusCod) = "59800" 
+                    then "02.02"
+
+        else if     Text.Start(Text.Trim(CencusCod),1) = "5" 
+                    then LinhaCenCus
+
+        else if     Text.Trim(LinhaConta) = "CC" 
+                and Text.Trim(LinhaCenCus) = "CONTA" 
+                    then "07.95"
+
+        else if     Text.Trim(ContaCod) = "34102998" 
+                    then LinhaConta
+
+        else if     Text.Trim(CencusCod) = "10512" 
+                    then LinhaConta
+
+        else if     Text.Trim(LinhaConta) <> "CC" 
+                    then LinhaConta 
+
+        else Text.Trim(LinhaCenCus)
+in 
+    x

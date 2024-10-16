@@ -1,0 +1,21 @@
+// verificar qual a aliquota mais proxima da realizada
+
+(
+    valor as number
+)=>
+
+let
+
+//  x = 8,
+    x = valor,
+
+    Lista = List.Sort({0,4,7,12,17, x}), // percentuais de ICMS
+    Posicao = List.PositionOfAny(Lista,{x}),
+    Proximos = {Lista{Posicao - 1}, Lista{Posicao + 1}}
+in
+    try
+        if Number.Abs(Proximos{0} - x) > Number.Abs(Proximos{1} - x) 
+        then Proximos{1} 
+        else Proximos{0}
+    otherwise 
+        null

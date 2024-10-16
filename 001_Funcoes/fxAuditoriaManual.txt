@@ -1,0 +1,30 @@
+(
+    TabelaTeste     as table,
+    NomeAuditoria   as text,
+    Explicacao      as text,
+    Recomendacao    as text
+)=>
+
+let
+
+    teste = 
+        if Table.RowCount(TabelaTeste) > 0 
+
+        then 
+            Table.FromRecords({[
+                Name    = NomeAuditoria, 
+                Detail  = Explicacao, 
+                Message = Recomendacao
+            ]})
+
+        else 
+            Table.FirstN(
+                Table.FromRecords({[
+                    Name = null, 
+                    Detail = null, 
+                    Message = null
+                ]})
+                ,0
+            )
+
+in teste

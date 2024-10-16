@@ -1,0 +1,22 @@
+(
+    prazo_dias as text,
+    prazo_perc as text
+)=>
+
+let
+//    prazo_dias = "5,10,15,20,25,30,35,40,45,50,55,60",
+//    prazo_perc = "12,8,8,8,8,8,8,8,8,8,8,8", 
+    prazo_dias_split = Text.Split(prazo_dias,","),
+    prazo_perc_split = Text.Split(prazo_perc,","),
+
+    ListaZipada = List.Zip({
+        prazo_dias_split,
+        prazo_perc_split
+    }),
+
+    tabela_fim = 
+        #table({"dias", "perc"}, ListaZipada),
+
+    TipoAlterado = Table.TransformColumnTypes(tabela_fim,{{"dias", type number}, {"perc", type number}})
+in
+    TipoAlterado

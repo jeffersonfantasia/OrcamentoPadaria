@@ -1,0 +1,97 @@
+(
+    secoes, // informar -->> #sections[Section1]
+    optional ListaTabelasDesconsiderar as list
+) =>
+
+let
+
+//    ListaTabelasDesconsiderar = {"fxErro", "fxVerificaErro"},
+    ConsultaAtual = {"ERROS", "fxVerificaErro"},
+
+ //   SharedParaTabela = Record.ToTable(#sections[Section1]),
+    SharedParaTabela = Record.ToTable(secoes),
+
+    TirarTabelaAtual = Table.SelectRows(
+        SharedParaTabela, 
+        each not 
+        List.Contains(
+            if ListaTabelasDesconsiderar = null 
+            then ConsultaAtual 
+            else ListaTabelasDesconsiderar & ConsultaAtual, 
+            [Name]
+        )
+    ),
+    // ---------- ERROS TIPO 1 INICIO
+    #"Erros Removidos" = Table.RemoveRowsWithErrors(TirarTabelaAtual, {"Value"}), 
+
+    SomenteTabelas = Table.SelectRows(#"Erros Removidos", each ([Value] is table)), 
+
+    TentaExecutarPrimeiraLinhaTabela = Table.AddColumn(
+        SomenteTabelas, 
+        "ErroLinhasTabela", 
+        each 
+            let
+                linhas_erros = Table.SelectRowsWithErrors([Value]), 
+                primeira_linha = Table.FirstN(linhas_erros, 1), 
+                despivotar = Table.UnpivotOtherColumns(primeira_linha, {}, "Atributo", "_Valor_"), 
+                linhas_erros2 = Table.SelectRowsWithErrors(despivotar)[_Valor_]
+            in
+                if List.IsEmpty(linhas_erros2) then null else linhas_erros2{0}
+    ), 
+
+    SeErroEntaoMostra = Table.AddColumn(
+        TentaExecutarPrimeiraLinhaTabela, 
+        "Personalizar", 
+        each try [ErroLinhasTabela]
+    ), 
+
+    ErroDetalhes = Table.ExpandRecordColumn(
+        SeErroEntaoMostra, 
+        "Personalizar", 
+        {"Error"}, 
+        {"Value.1"}
+    ), 
+
+    ErroExpandido = Table.ExpandRecordColumn(
+        ErroDetalhes, 
+        "Value.1", 
+        {"Message", "Detail"}, 
+        {"Message", "Detail"}
+    ), 
+
+    DetalhesFormado = Table.TransformColumns(
+        ErroExpandido, 
+        {
+            {
+                "Detail",
+                each 
+                    "Primeira Linha com erro => " & Text.Combine(Record.ToList(_), " | "), 
+                type text
+            }
+        }
+    ), 
+
+    SomenteLinhasComErro = Table.SelectRows(DetalhesFormado, each ([Message] <> null)), 
+
+    SomenteColunasSelecionadas = Table.SelectColumns(
+        SomenteLinhasComErro, 
+        {"Name", "Detail", "Message"}
+    ),
+
+    _ErrosTipo1_ = Table.ReplaceErrorValues(SomenteColunasSelecionadas, {{"Detail", null}}),
+    // ---------- ERROS TIPO 1 FIM
+
+
+    // ---------- ERROS TIPO 2 INICIO
+    ErrosTipo2 = Table.SelectRowsWithErrors(TirarTabelaAtual, {"Value"}),
+    #"Personalização Adicionada" = Table.AddColumn(ErrosTipo2, "Personalizar", each try [Value]),
+    #"Personalizar Expandido" = Table.ExpandRecordColumn(#"Personalização Adicionada", "Personalizar", {"Error"}, {"Error"}),
+    #"Error Expandido" = Table.ExpandRecordColumn(#"Personalizar Expandido", "Error", {"Message", "Detail"}, {"Message", "Detail"}),
+    _ErrosTipo2_ = Table.SelectColumns(#"Error Expandido",{"Name", "Detail", "Message"}),
+    // ---------- ERROS TIPO 2 FIM
+
+    // CONSOLIDANDO TABELAS
+    Personalizar1 = Table.Combine({_ErrosTipo1_, _ErrosTipo2_})
+
+in
+    Personalizar1

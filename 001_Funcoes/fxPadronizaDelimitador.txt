@@ -1,0 +1,24 @@
+(Texto as text) =>
+
+let
+
+    Substituir = 
+        {
+            {";",","},
+            {"/",","},
+            {"-",","},
+            {":",","},
+            {"|",","},
+            {" ",","},
+            {".",","}
+        }
+        
+in
+    Text.Combine(
+        List.ReplaceMatchingItems(
+            Text.ToList(
+                Text.Upper(Texto)
+            ), 
+            Substituir
+        )
+    )

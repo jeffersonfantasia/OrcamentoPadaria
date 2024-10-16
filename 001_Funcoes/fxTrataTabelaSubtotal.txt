@@ -1,0 +1,13 @@
+(
+    pasta_base as text,
+    pasta_e_arquivo as text,
+    tabela as text,
+    ordem_auditoria as text
+)=>
+let
+    Fonte = Excel.Workbook(File.Contents(pasta_base & pasta_e_arquivo), null, true),
+    DRE_Table = Fonte{[Item=tabela,Kind="Table"]}[Data],
+    TabelaFim = Table.AddColumn(DRE_Table, "ORIGEM", each pasta_e_arquivo),
+    TabelaFimB = Table.AddColumn(TabelaFim , "ORDEM_AUDIT", each ordem_auditoria)
+in
+    TabelaFimB 

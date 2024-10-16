@@ -1,0 +1,9 @@
+(
+    Endereco as text,
+    Objeto as text
+)=> 
+let
+    Fonte = Excel.Workbook(File.Contents(Endereco), null, true),
+    Dados = Fonte{[Item=Objeto]}[Data]
+in
+    Dados

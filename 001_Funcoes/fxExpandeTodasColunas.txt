@@ -1,0 +1,9 @@
+(
+    Tabela as table,
+    NomeColunaComTabelas as text
+)=>
+
+let
+    Colunas = Table.ColumnNames(Table.Column(Tabela, NomeColunaComTabelas){0})
+in
+    Table.ExpandTableColumn(Tabela, NomeColunaComTabelas, Colunas, Colunas)

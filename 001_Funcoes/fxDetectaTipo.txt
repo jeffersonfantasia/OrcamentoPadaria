@@ -1,0 +1,82 @@
+let
+    Fonte = let
+    funcao = 
+
+        // ====================================== COMEÇA FUNÇÃO ======================================
+
+    (
+        TabelaOrigem as table
+    )=>
+
+    let 
+        _tabela_origem_tipada_ = TabelaOrigem,
+
+        _dicionario_tipos_ = Table.SelectColumns(
+            Table.Schema(_tabela_origem_tipada_),
+            {"Name", "TypeName", "Kind"}
+        ),
+
+        _dicionario_tipado_ = Table.FromRecords({
+            [tipo = type null,          colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "null"))],
+            [tipo = type logical,       colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "logical"))],
+            [tipo = type number,        colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "number"))],
+            [tipo = type time,          colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "time"))],
+            [tipo = type date,          colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "date"))],
+            [tipo = type datetime,      colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "datetime"))],
+            [tipo = type datetimezone,  colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "datetimezone"))],
+            [tipo = type duration,      colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "duration"))],
+            [tipo = type text,          colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "text"))],
+            [tipo = type binary,        colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "binary"))],
+            [tipo = type type,          colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "type"))],
+            [tipo = type list,          colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "list"))],
+            [tipo = type record,        colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "record"))],
+            [tipo = type table,         colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "table"))],
+            [tipo = type function,      colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "function"))],
+            [tipo = type anynonnull,    colunas =  Table.SelectRows(_dicionario_tipos_, each ([Kind] = "anynonnull"))]
+        }),
+
+        _colunas_expandidas_ = Table.ExpandTableColumn(_dicionario_tipado_, "colunas", {"Name"}, {"Name"}),
+        _somente_existentes_ = Table.SelectRows(_colunas_expandidas_, each ([Name] <> null)),
+        _lista_pares_ = Table.AddColumn(_somente_existentes_, "ListaPar", each {[Name], [tipo]}),
+        _lista_fim_ = _lista_pares_[ListaPar],
+
+        _fim_ = Table.FromRecords({[
+            lista_geral     = List.Buffer(_lista_fim_), 
+            tabela_tipos    = Table.Buffer( Table.SelectColumns(_lista_pares_, {"Name", "tipo"}) )
+        ]})
+        
+    in
+        _fim_
+
+        // ====================================== FIM DA FUNÇÃO ======================================
+
+            , metadados = [
+                Documentation.Name  = "IdentificaTipoDadosCadaColunaTabelaV2",
+                Documentation.Description = "by Joviano Silveira (www.joviano.com) => Função identifica e (se quiser) filtra os tipos de dados de uma tabela",
+                Documentation.Examples = {
+
+                    // exemplo 01
+                    [
+                        Description = "Tipos de dados de uma tabela",
+                        Code = "IdentificaTipoDadosCadaColunaTabela(Tabela)",
+                        Result = "
+                        Uma tabela com uma linha, sendo: 
+                        -> Coluna 'lista_geral' a lista de todos os campos e tipos
+                        -> Coluna 'tabela_tipos' uma tabela com os campos e tipos em cada linha
+                        Tudo Bufferizado 
+                        "
+                    ]
+
+                }
+            ]
+
+in
+
+    Value.ReplaceType(
+        funcao,
+        Value.ReplaceMetadata(
+            Value.Type(funcao),metadados
+        )
+    )
+in
+    Fonte

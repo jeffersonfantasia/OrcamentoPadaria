@@ -1,0 +1,76 @@
+/*
+como é uma função recursiva
+deve ser incluida direto no arquivo
+sem usar o "run"
+*/
+let
+    funcao = 
+
+        // ====================================== COMEÇA FUNÇÃO ======================================
+
+        (
+            TabelaSaldos as table,
+            optional SaldoAnterior as number,
+            optional contador as number,    
+            optional RegFim as table       
+        )=>
+
+        let
+            saldo_credor_anterior   = if SaldoAnterior = null then 0 else SaldoAnterior, 
+            Fonte                   = Table.ReplaceValue(TabelaSaldos,null,0,Replacer.ReplaceValue,{"SALDO"}), 
+            contador                = if contador = null then 1 else contador +1, 
+            qtd_linhas              = Table.RowCount(Fonte), 
+            LinhaSelecionada        = Fonte{contador - 1},
+            saldo_atual_recalculado = LinhaSelecionada[SALDO] + saldo_credor_anterior, 
+            APagar                  = if saldo_atual_recalculado < 0 then saldo_atual_recalculado else 0, 
+            ARecuperar              = if saldo_atual_recalculado > 0 then saldo_atual_recalculado else 0, 
+
+            RegistroFim             = 
+                let a = Table.FromRecords({Record.Combine({LinhaSelecionada, [PAGAR = APagar, RECUPERAR = ARecuperar]})})
+                in 
+                    if contador = 1 then a
+                    else Table.Combine({RegFim, a}), 
+
+            out = 
+                if contador < qtd_linhas
+                then @fxSaldoAcumuladoTributos(TabelaSaldos, ARecuperar, contador, RegistroFim)
+                else RegistroFim  
+
+        in
+            out
+
+        // ====================================== TERMINA FUNÇÃO ======================================
+
+        , metadados = [
+            Documentation.Name  = "fxSaldoAcumuladoTributos",
+            Documentation.Description = "by Joviano Silveira (www.joviano.com) => Função pega uma tabela, e faz o calculo do transporte de saldo credor do mês anterior",
+            Documentation.Examples = {
+
+                // exemplo 01
+                [
+                    Description = "Exemplo",
+                    Code = "fxSaldoAcumuladoTributos(SuaTabela, 20, null, null)
+                    /* 
+                    - Obrigatoriamente deve haver uma coluna denominada SALDO
+                    - Ela deve estar ordenada na forma que o algoritmo deve ler e fazer o transporte (exemplo, por data)
+                    */",
+                    Result = "
+                    |       DATA|   SALDO|  PAGAR|  RECUPERAR|
+                    | 31/01/2021|    -100|    -80|          0|
+                    | 28/02/2021|     100|      0|        100|
+                    | 31/03/2021|      50|      0|        150|
+                    | 30/04/2021|    -100|      0|         50|
+                    | 31/05/2021|    -200|   -150|          0|
+                    "
+                ]
+            }
+        ]
+
+in
+
+    Value.ReplaceType(
+        funcao,
+        Value.ReplaceMetadata(
+            Value.Type(funcao),metadados
+        )
+    )

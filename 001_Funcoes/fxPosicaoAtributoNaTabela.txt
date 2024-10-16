@@ -1,0 +1,10 @@
+(
+    Tabela as table,
+    Atributo as text
+)=>
+
+let
+    Fonte = Table.Schema(Tabela),
+    Posicao = Table.SelectRows(Fonte, each [Name] = Atributo)[Position]{0}
+in
+    Posicao

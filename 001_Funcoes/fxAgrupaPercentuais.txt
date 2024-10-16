@@ -1,0 +1,65 @@
+(
+    TabelaOrigem, 
+    LimiteMinimo, 
+    optional PercentualSobraMesAnterior,
+    optional LinhaAtual,
+    optional TabelaFim
+)=>
+
+let
+
+    LinhasTabelaOrigem = Table.RowCount(TabelaOrigem),
+
+    PercentualSobraMesAnteriorDentro = 
+        if      PercentualSobraMesAnterior = null 
+        then    0 
+        else    PercentualSobraMesAnterior,
+
+    LinhaAtual = 
+        if      LinhaAtual = null 
+        then    0 
+        else    LinhaAtual + 1,
+    
+    PercMesAtual_plus_SaldoMesAnt = TabelaOrigem{LinhaAtual}[PERCENTUAL_RECEB_MES] + PercentualSobraMesAnteriorDentro,
+
+    Tabela = 
+        if      PercMesAtual_plus_SaldoMesAnt >= LimiteMinimo  
+        then    Table.FromRecords({[
+                    Mes = TabelaOrigem{LinhaAtual}[Mes], 
+                    Percentual = PercMesAtual_plus_SaldoMesAnt
+                ]}) 
+        else    Table.FromRecords({[
+                    Mes = null, 
+                    Percentual = null
+                ]}),
+
+    TabelaFimDentro = 
+        if      TabelaFim = null 
+        then    Tabela 
+        else    Table.SelectRows(
+                    Table.Combine({TabelaFim,Tabela}), each 
+                    [Mes] <> null
+                ),
+
+    PercentualProximoMes = 
+        if      PercMesAtual_plus_SaldoMesAnt < LimiteMinimo 
+        then    PercMesAtual_plus_SaldoMesAnt
+        else    0,
+
+    out = 
+        if      LinhaAtual + 1 < LinhasTabelaOrigem
+        then    @fxAgrupaPercentuais(TabelaOrigem, LimiteMinimo, PercentualProximoMes, LinhaAtual,TabelaFimDentro)
+        else    (
+            if List.Sum(TabelaFimDentro[Percentual]) < 1
+            then Table.InsertRows(
+                    TabelaFimDentro, 
+                    0,
+                    {[
+                        Mes = TabelaOrigem{LinhaAtual}[Mes], 
+                        Percentual = 1 - List.Sum(TabelaFimDentro[Percentual]) 
+                    ]})
+                else TabelaFimDentro 
+        ) 
+
+in
+    out

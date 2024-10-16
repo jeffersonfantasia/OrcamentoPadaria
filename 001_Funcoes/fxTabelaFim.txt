@@ -1,0 +1,27 @@
+(
+    _EmpFilNeg  as text,
+    _data       as date,
+    _valor      as number,
+    _historico  as text,
+    _conta      as text, 
+    _cencus     as text 
+)=>
+
+let
+
+    _empresa  = Text.BeforeDelimiter(_EmpFilNeg, "-"),
+    _filial   = Text.BetweenDelimiters(_EmpFilNeg, "-", "-"),
+    _negocio  = Text.AfterDelimiter(_EmpFilNeg, "-", {0, RelativePosition.FromEnd})       
+
+in
+
+    Table.FromRecords({[
+        EMPRESA  = _empresa,
+        FILIAL   = _filial,
+        NEGOCIO  = _negocio,
+        DATA     = Date.StartOfMonth(_data),
+        VALOR    = _valor,
+        HISTORICO= _historico,
+        CONTA    = _conta,
+        CENCUS   = _cencus 
+    ]})
