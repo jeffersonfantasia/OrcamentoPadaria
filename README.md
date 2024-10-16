@@ -1,13 +1,13 @@
 # Orçamento da Padaria do Seu Manoel
 *Treinamento Black Eagle - Jovi Treinamentos!*
 
-### Criando um orçamento empresarial automatizado utilizando Excel com Power Query e VBA
+## Criando um orçamento empresarial automatizado utilizando Excel com Power Query e VBA
 
-#### Início do Projeto
+### Início do Projeto
 
 Comece criando os seguintes arquivos:
 - **ParametrosGlobais.xlsx**: Trará os parâmetros para serem utilizado em qualquer um dos arquivos que serão criados. Esse arquivo será a nossa FUV (Fonte Única da Verdade)
-- **TouroReprodutor.xlsm**: Será o nosso arquivo base para criar os demais arquivos `Trampolim.xlsm` em cada uma das pastas, já trazendo as macros, botões e vínculo com o arquivo `ParametrosGlobais.xlsx`
+- **TouroReprodutor.xlsm**: Será o nosso arquivo base para criar os demais arquivos `ZZZ_Trampolim.xlsm` em cada uma das pastas, já trazendo as macros, botões e vínculo com o arquivo `ParametrosGlobais.xlsx`
 
 <br>
 
@@ -30,7 +30,6 @@ Private Sub Workbook_Open()
 End Sub
 ```
 
-<br>
 
 ##### Criar novo módulo
 ```
@@ -59,6 +58,22 @@ End Sub
 
 <br>
 
+Organizar as informações em pastas dentro do Power Query:
+- Parametros Globais: Fazer referência a tabela trazendo a informação dos valores dos parâmetros no seu tipo primitivo (text, date, number...)
+- Parametros Locais: Usar a informação do local do arquivo para automatizar a chamada do arquivo parametros globais.
 
+<br>
 
+### Criando as entidades necessárias para o projeto
+- Plano de Contas
+- DRE
+- Produto
+- Receita (proporção entre os insumos para fazer 1 kg de pão, aprox. 20 pães)
 
+<br>
+
+### Peça 1 - Faturamento
+- Definição da granularidade: Produto
+- Preço no momento zero / Matriz reajustes
+- Prazo de recebimento: % recebido em cada período
+- Finaliza com arquivo `ZZZ_Trampolim.xlsm` levando as informações de DRE e FLCX
