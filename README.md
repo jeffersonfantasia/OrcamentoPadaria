@@ -54,7 +54,7 @@ End Sub
 ```
 <br>
 
-> :warning: **Atenção:** Faça as alterações conforme necessidade
+> :warning: Faça as alterações conforme necessidade
 
 <br>
 
@@ -63,10 +63,12 @@ Organizar as informações em pastas dentro do Power Query:
 - Parametros Locais: Usar a informação do local do arquivo para automatizar a chamada do arquivo parametros globais.
 - Funções: Incluir as funções necessárias da pasta 001_Funcoes
 - Auditorias: Rodar a verificação de erro com a função `fxVerificaErros`
+- Arquivos Base: Pasta vazia inicialmente para ser usado para alocar a ingestão dos arquivos excel nos arquivos `ZZZ_Trampolim.xlsm` que serão produzidos
+- Fim: Para receber as etapas DRE e FLCX
 
 <br>
 
-> :warning: **Atenção:** Desabilite a conexão em segunbdo plano das tabelas!
+> :warning: Desabilite a conexão em segundo plano das tabelas!
 
 <br>
 
@@ -81,8 +83,17 @@ Organizar as informações em pastas dentro do Power Query:
 
 ### Peça 1 - Faturamento
 - Definição da granularidade: Produto
+- Quantidade alvo por mês, ano, produto e filial
 - Preço no momento zero / Matriz reajustes
 - Prazo de recebimento: % recebido em cada período
 - Finaliza com arquivo `ZZZ_Trampolim.xlsm` levando as informações de DRE e FLCX
+    - Funções utilizadas: 
+        - `fxListaUmaDataPorPeriodo` para gerar uma lista apenas do primeiro dia de cada mês entre a data inicial e final
+        - `fxMultiplicacaoAcumulada` para gerar o reajuste acumulado para ser multiplicado pelo preço de venda
+        - `fxQuebraPrazoPgto` para gerar uma lista com os dias de recebimento e seus devidos percentuais (não utilizada nesse projeto)
+        - `fxTabelaFim` para gerar uma tabela com os dados esperados, mantendo assim a padronização do output
+        - `fxExpandeTodasColunas` para expandir as colunas de uma tabela, sem precisar mencionar os nomes
+
+<br>
 
 ### Peça 2 - Tributos
