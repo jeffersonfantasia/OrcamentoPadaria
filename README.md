@@ -61,6 +61,8 @@ End Sub
 Organizar as informações em pastas dentro do Power Query:
 - Parametros Globais: Fazer referência a tabela trazendo a informação dos valores dos parâmetros no seu tipo primitivo (text, date, number...)
 - Parametros Locais: Usar a informação do local do arquivo para automatizar a chamada do arquivo parametros globais.
+- Funções: Incluir as funções necessárias
+- Auditorias: Rodar a 
 
 <br>
 
@@ -69,6 +71,7 @@ Organizar as informações em pastas dentro do Power Query:
 - DRE
 - Produto
 - Receita (proporção entre os insumos para fazer 1 kg de pão, aprox. 20 pães)
+- Filial
 
 <br>
 
@@ -77,3 +80,5 @@ Organizar as informações em pastas dentro do Power Query:
 - Preço no momento zero / Matriz reajustes
 - Prazo de recebimento: % recebido em cada período
 - Finaliza com arquivo `ZZZ_Trampolim.xlsm` levando as informações de DRE e FLCX
+
+### Peça 2 - Tributos
