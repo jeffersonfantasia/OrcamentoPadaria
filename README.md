@@ -5,6 +5,10 @@
 
 #### Início do Projeto
 
+Comece criando os seguintes arquivos:
+- **ParametrosGlobais.xlsx**: Trará os parâmetros para serem utilizado em qualquer um dos arquivos que serão criados. Esse arquivo será a nossa FUV (Fonte Única da Verdade)
+- **TouroReprodutor.xlsm**: Será o nosso arquivo base para criar os demais arquivos `Trampolim.xlsm` em cada uma das pastas, já trazendo as macros, botões e vínculo com o arquivo `ParametrosGlobais.xlsx`
+
 - Peça 1 - Faturamento
     - Definir a granularidade (Cliente/ Departamento / Marca / Família de produtos / Produto) por mês
     - Preço - no momento zero / Matriz de Reajustes
