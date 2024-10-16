@@ -46,7 +46,7 @@ Sub Atualizar()
     Range("b4").Value = Now
 
     
-    'Mensagem final
+    ' Mensagem final
     MsgBox "Atualização Concluida", vbInformation, "Status"
 
 
@@ -61,8 +61,12 @@ End Sub
 Organizar as informações em pastas dentro do Power Query:
 - Parametros Globais: Fazer referência a tabela trazendo a informação dos valores dos parâmetros no seu tipo primitivo (text, date, number...)
 - Parametros Locais: Usar a informação do local do arquivo para automatizar a chamada do arquivo parametros globais.
-- Funções: Incluir as funções necessárias
-- Auditorias: Rodar a 
+- Funções: Incluir as funções necessárias da pasta 001_Funcoes
+- Auditorias: Rodar a verificação de erro com a função `fxVerificaErros`
+
+<br>
+
+> :warning: **Atenção:** Desabilite a conexão em segunbdo plano das tabelas!
 
 <br>
 
