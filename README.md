@@ -97,3 +97,21 @@ Organizar as informações em pastas dentro do Power Query:
 <br>
 
 ### Peça 2 - Tributos
+- Definição da alíquota já como parâmetro local do arquivo `ZZZ_Trampolim.xlsm`
+- Puxa a informação de faturamento da peça anterior
+- Finaliza com o arquivo `ZZZ_Trampolim.xlsm` levando as informações de DRE e FLCX
+
+<br>
+
+### Peça 3 - CMV
+- Buscar a receita do produto acabado para saber a necessidade de compra
+- Custos por produto, para isso devemos trazer a informação da quantidade de venda para estimar a compra
+- Matriz de reajustes
+- Prazo de pagamento ao fornecedor
+- Finaliza com arquivo `ZZZ_Trampolim.xlsm` levando as informações de DRE e FLCX
+    - Funções utilizadas:
+        - `fxListaUmaDataPorPeriodo` para gerar uma lista apenas do primeiro dia de cada mês entre a data inicial e final
+        - `fxQuebraPrazoPgto` para gerar uma lista com os dias de recebimento e seus devidos percentuais (não utilizada nesse projeto)
+        - `fxMultiplicacaoAcumulada` para gerar o reajuste acumulado para ser multiplicado pelo preço de custo
+        - `fxTabelaFim` para gerar uma tabela com os dados esperados, mantendo assim a padronização do output
+        - `fxExpandeTodasColunas` para expandir as colunas de uma tabela, sem precisar mencionar os nomes
