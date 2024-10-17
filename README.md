@@ -115,3 +115,13 @@ Organizar as informações em pastas dentro do Power Query:
         - `fxMultiplicacaoAcumulada` para gerar o reajuste acumulado para ser multiplicado pelo preço de custo
         - `fxTabelaFim` para gerar uma tabela com os dados esperados, mantendo assim a padronização do output
         - `fxExpandeTodasColunas` para expandir as colunas de uma tabela, sem precisar mencionar os nomes
+
+<br>
+
+### Peça 4 - Despesas Variáveis
+- Buscar o faturamento no arquivo `ZZZ_Trampolim.xlsm` da Peça 1
+- Buscar o faturamento com a data de recebimento somente de cartão para cálculos das taxas
+- Finaliza com arquivo `ZZZ_Trampolim.xlsm` levando as informações de DRE e FLCX
+    - Funções utilizadas:
+        - `fxTabelaFim` para gerar uma tabela com os dados esperados, mantendo assim a padronização do output
+        - `fxExpandeTodasColunas` para expandir as colunas de uma tabela, sem precisar mencionar os nomes
