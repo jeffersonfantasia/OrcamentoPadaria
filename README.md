@@ -200,11 +200,13 @@ Sub AtualizaTudo()
     ' Atualiza todas as conexões e consultas de dados
     ActiveWorkbook.RefreshAll
     
-    ' Carimba a data e hora que finalizou a atualização
+    ' Carimba a data e hora que iniciou a atualização
     Planilha1.Select
     Range("b4").Value = Now
     
     AtualizarBases
+    
+    ' Carimba a data e hora que finalizou a atualização
     Planilha1.Select
     Range("b5").Value = Now()
     
