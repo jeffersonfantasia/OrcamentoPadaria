@@ -149,6 +149,7 @@ Organizar as informações em pastas dentro do Power Query:
 - Nessa etapa iremos buscar todos os arquivos DRE e FLCX criados
 - Adicionaremos uma coluna com a origem do arquivo para caso haja discrepância nos valores conseguirmos debugar melhor o problema
 - Assim finalizaremos com um `Table.Combine()` de todas as tabelas de DRE e outra com as tabelas FLCX,fechando assim o arquivo `Fim.xlsx`
+- Criado arquivo `Z_Resultado.xlsm` que traz a apresentação dos dados em uma matriz de DRE do arquivo `Tabelas.xlsx`
 
 <br>
 
