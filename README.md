@@ -272,7 +272,7 @@ End Sub
 
 O código da macro `AtualizaTudo()` é responsável por atualizar todas as conexões de dados do arquivo Excel, além de abrir e atualizar outras planilhas conforme uma lista específica. Vamos detalhar cada parte:
 
-#### **Sub SaveClose()**
+##### **Sub SaveClose()**
 ```vba
 Sub SaveClose()
     ActiveWorkbook.Save
@@ -283,7 +283,7 @@ Esta subrotina salva e fecha o arquivo do Excel que está atualmente ativo. Ela 
 
 ---
 
-#### **Sub AtualizaTudo()**
+##### **Sub AtualizaTudo()**
 ```vba
 Sub AtualizaTudo()
 
@@ -324,7 +324,7 @@ Por fim, uma mensagem é exibida ao usuário informando que a atualização foi 
 
 ---
 
-#### **Sub AtualizarBases()**
+##### **Sub AtualizarBases()**
 Essa subrotina é o coração da lógica de atualização das outras planilhas.
 
 ```vba
@@ -388,5 +388,5 @@ Por fim, os alertas do Excel são reativados.
 
 ---
 
-#### **Resumo**
+##### **Resumo**
 A macro `AtualizaTudo` realiza a atualização das conexões de dados do arquivo atual, carimba a data de atualização, e também abre e atualiza outras planilhas com base em uma lista na "Planilha3". Ela desabilita alertas e rodará uma macro "Atualizar" em cada arquivo que abrir. Caso encontre algum erro em uma planilha, ela notifica o usuário e interrompe o processo.
