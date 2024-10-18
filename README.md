@@ -20,7 +20,7 @@ Comece criando os seguintes arquivos:
 <br>
 
 ##### Workbook - Open
-```
+```vba
 Private Sub Workbook_Open()
 
     Planilha1.Select
@@ -32,11 +32,24 @@ End Sub
 
 
 ##### Criar novo módulo
-```
+```vba
 Sub Atualizar()
 
+    Dim conexao As WorkbookConnection
+    
     ' Torna a função volátil, ou seja, ela será recalculada sempre que houver qualquer alteração na planilha
     Application.Volatile
+    
+
+    ' Loop por todas as conexões no arquivo ativo
+    For Each conexao In ActiveWorkbook.Connections
+        ' Verifica se a conexão é uma conexão de consulta (tipo OLEDB ou ODBC)
+        If conexao.Type = xlConnectionTypeODBC Or conexao.Type = xlConnectionTypeOLEDB Then
+            ' Desabilita a atualização em segundo plano
+            conexao.OLEDBConnection.BackgroundQuery = False
+        End If
+    Next conexao
+    
     
     ' Atualiza todas as conexões e consultas de dados
     ActiveWorkbook.RefreshAll
@@ -44,11 +57,6 @@ Sub Atualizar()
     ' Carimba a data e hora que finalizou a atualização
     Planilha1.Select
     Range("b4").Value = Now
-
-    
-    ' Mensagem final
-    MsgBox "Atualização Concluida", vbInformation, "Status"
-
 
 End Sub
 ```
@@ -141,3 +149,244 @@ Organizar as informações em pastas dentro do Power Query:
 - Nessa etapa iremos buscar todos os arquivos DRE e FLCX criados
 - Adicionaremos uma coluna com a origem do arquivo para caso haja discrepância nos valores conseguirmos debugar melhor o problema
 - Assim finalizaremos com um `Table.Combine()` de todas as tabelas de DRE e outra com as tabelas FLCX,fechando assim o arquivo `Fim.xlsx`
+
+<br>
+
+### AUDITOR
+- Agora criaremos um arquivo para ser o nosso auditor de erros, varrendo todos os arquivos da pasta raiz em busca daquilo que identificamos como possíveis erros:
+- Exemplos:
+    - Arquivos com caminhos não dinamizados
+- Função utilizada: `fxVerificaTodosScriptsTodosArquivos`
+
+<br>
+
+### FINALIZANDO O PROJETO
+- Criaremos o arquivo `Atualizador.xlsm` responsável por automatizar a atualização em cascata dos arquivos `ZZZ_Trampolim.xlsm` já criados.
+- Vamos adicionar os parâmetros abaixo na tabela de parâmentros locais para termos a informação do tempo de atualização:
+    - Data e Hora inicial da atualização
+    - Data e Hora final da atualização
+    - Tempo de atualização: Data Hora final - Data hora inicial
+- Criaremos uma tabela com as informações necessárias para o script entender o que deve ser analisado
+
+| Pasta | Arquivo | Atualiza
+| ----------- | ----------- | ----------- | 
+| Nomes das pastas | Nome do arquivo | SIM ou NAO
+
+<br>
+
+- Criar um novo módulo no VBA com as macros abaixo:
+
+```vba
+
+Sub SaveClose()
+    ActiveWorkbook.Save
+    ActiveWorkbook.Close
+End Sub
+
+Sub AtualizaTudo()
+
+    ' Torna a função volátil, ou seja, ela será recalculada sempre que houver qualquer alteração na planilha
+    Application.Volatile
+    
+    ' Loop por todas as conexões no arquivo ativo
+    For Each conexao In ActiveWorkbook.Connections
+        ' Verifica se a conexão é uma conexão de consulta (tipo OLEDB ou ODBC)
+        If conexao.Type = xlConnectionTypeODBC Or conexao.Type = xlConnectionTypeOLEDB Then
+            ' Desabilita a atualização em segundo plano
+            conexao.OLEDBConnection.BackgroundQuery = False
+        End If
+    Next conexao
+
+    ' Atualiza todas as conexões e consultas de dados
+    ActiveWorkbook.RefreshAll
+    
+    ' Carimba a data e hora que finalizou a atualização
+    Planilha1.Select
+    Range("b4").Value = Now
+    
+    AtualizarBases
+    Planilha1.Select
+    Range("b5").Value = Now()
+    
+    'Mensagem final
+    MsgBox "Atualização Concluida", vbInformation, "Status"
+
+
+End Sub
+
+
+Sub AtualizarBases()
+    
+    ' === AGRADECIMENTO ESPECIAL A ALESSANDRO TROVATO ===
+    Application.DisplayAlerts = False
+
+    
+    'Define pasta
+    Planilha1.Select
+    Pasta = Range("B2").Value
+    
+    Linha = 2
+    
+    'Volta para planilha com endereços
+    Planilha3.Select
+    
+    While Cells(Linha, 3) <> ""
+    
+        If Cells(Linha, 3) = "SIM" Then
+    
+            'Carrega variáveis que compõe o endereço do arquivo a atualizar
+            SubPasta = Cells(Linha, 1).Value
+            Arquivo = Cells(Linha, 2).Value
+            EnderecoCompleto = Pasta & "/" & SubPasta & "/" & Arquivo
+            
+            Workbooks.Open (EnderecoCompleto) 'Abre planilha
+            'Quando abre a planilha, se houverem métodos .open serão executados
+            
+            'Vamos executar uma macro na planilha, mas caso não encontrar,
+            'e der erro, vai prosseguir...
+            On Error Resume Next
+            Application.Run Arquivo & "!Atualizar" 'Roda essa macro que está nela
+            
+            'Verifica se a planilha atualizada contém erros, se sim, "JOÃO KLEBER!"
+            Sheets("Erros").Select
+            If Range("C2").Value = "" Then
+                SaveClose
+            Else:
+                MsgBox "Erro identificado nesta planilha", vbCritical, "Verificar Erro"
+                End
+            End If
+            
+    
+        End If
+        Linha = Linha + 1
+        
+    Wend
+
+    ' Restaura as configurações originais do Excel
+    Application.DisplayAlerts = True
+
+End Sub
+
+```
+<br>
+
+O código da macro `AtualizaTudo()` é responsável por atualizar todas as conexões de dados do arquivo Excel, além de abrir e atualizar outras planilhas conforme uma lista específica. Vamos detalhar cada parte:
+
+#### **Sub SaveClose()**
+```vba
+Sub SaveClose()
+    ActiveWorkbook.Save
+    ActiveWorkbook.Close
+End Sub
+```
+Esta subrotina salva e fecha o arquivo do Excel que está atualmente ativo. Ela é usada mais à frente no processo de atualização de outras planilhas.
+
+---
+
+#### **Sub AtualizaTudo()**
+```vba
+Sub AtualizaTudo()
+
+    Application.Volatile
+```
+Essa linha torna a função volátil, o que significa que ela será recalculada sempre que houver qualquer mudança na planilha.
+
+```vba
+    For Each conexao In ActiveWorkbook.Connections
+        If conexao.Type = xlConnectionTypeODBC Or conexao.Type = xlConnectionTypeOLEDB Then
+            conexao.OLEDBConnection.BackgroundQuery = False
+        End If
+    Next conexao
+```
+Aqui, o código percorre todas as conexões de dados no arquivo ativo e desabilita a atualização em segundo plano para conexões do tipo ODBC ou OLEDB, garantindo que as atualizações sejam feitas de forma síncrona.
+
+```vba
+    ActiveWorkbook.RefreshAll
+```
+Esta linha atualiza todas as conexões e consultas de dados do arquivo.
+
+```vba
+    Planilha1.Select
+    Range("b4").Value = Now
+```
+Aqui, o código seleciona a "Planilha1" e insere a data e hora atuais na célula B4, indicando o momento em que a atualização foi concluída.
+
+```vba
+    AtualizarBases
+    Range("b4").Value = Now()
+```
+A subrotina `AtualizarBases` é chamada para atualizar outras planilhas listadas em outra aba (a lógica dessa subrotina é explicada mais abaixo). Após essa atualização, a data e hora são novamente registradas na célula B4.
+
+```vba
+    MsgBox "Atualização Concluida", vbInformation, "Status"
+```
+Por fim, uma mensagem é exibida ao usuário informando que a atualização foi concluída.
+
+---
+
+#### **Sub AtualizarBases()**
+Essa subrotina é o coração da lógica de atualização das outras planilhas.
+
+```vba
+    Application.DisplayAlerts = False
+```
+Aqui, a macro desabilita os alertas do Excel para evitar interrupções ou mensagens enquanto as planilhas estão sendo abertas e atualizadas.
+
+```vba
+    Planilha1.Select
+    Pasta = Range("B2").Value
+```
+A "Planilha1" é selecionada, e o caminho da pasta onde estão os arquivos a serem atualizados é armazenado na variável `Pasta`, que vem da célula B2.
+
+```vba
+    Linha = 2
+    Planilha3.Select
+```
+A variável `Linha` é inicializada com o valor 2 (referente à linha da planilha onde começa a lista de arquivos) e a "Planilha3" (onde parece estar a lista de arquivos) é selecionada.
+
+```vba
+    While Cells(Linha, 3) <> ""
+        If Cells(Linha, 3) = "SIM" Then
+```
+O código entra em um laço `While`, que continua enquanto a célula na coluna 3 (coluna C) da linha atual não estiver vazia. Ele verifica se o valor da célula é "SIM", indicando que aquele arquivo precisa ser atualizado.
+
+```vba
+            SubPasta = Cells(Linha, 1).Value
+            Arquivo = Cells(Linha, 2).Value
+            EnderecoCompleto = Pasta & "/" & SubPasta & "/" & Arquivo
+            Workbooks.Open (EnderecoCompleto)
+```
+Se o valor for "SIM", a macro coleta o nome da subpasta (coluna A), o nome do arquivo (coluna B), monta o caminho completo do arquivo e o abre.
+
+```vba
+            On Error Resume Next
+            Application.Run Arquivo & "!Atualizar"
+```
+Aqui, a macro tenta rodar uma macro chamada "Atualizar" dentro do arquivo recém-aberto. Se houver um erro (como a macro não existir no arquivo), ele será ignorado por causa do `On Error Resume Next`.
+
+```vba
+            Sheets("Erros").Select
+            If Range("C2").Value = "" Then
+                SaveClose
+            Else
+                MsgBox "Erro identificado nesta planilha", vbCritical, "Verificar Erro"
+                End
+            End If
+```
+Depois, a macro verifica a planilha "Erros" do arquivo aberto. Se a célula C2 estiver vazia, significa que não houve erros, e o arquivo é salvo e fechado usando a subrotina `SaveClose`. Se C2 contiver algum valor, a macro alerta o usuário sobre o erro e interrompe o processo.
+
+```vba
+        Linha = Linha + 1
+    Wend
+```
+A variável `Linha` é incrementada para que a macro processe o próximo arquivo na lista.
+
+```vba
+    Application.DisplayAlerts = True
+```
+Por fim, os alertas do Excel são reativados.
+
+---
+
+#### **Resumo**
+A macro `AtualizaTudo` realiza a atualização das conexões de dados do arquivo atual, carimba a data de atualização, e também abre e atualiza outras planilhas com base em uma lista na "Planilha3". Ela desabilita alertas e rodará uma macro "Atualizar" em cada arquivo que abrir. Caso encontre algum erro em uma planilha, ela notifica o usuário e interrompe o processo.
